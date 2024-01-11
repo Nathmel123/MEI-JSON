@@ -43,14 +43,6 @@ function xmlToArray(SimpleXMLElement $xml): array
         if (!empty($xmlId)) {
             $result['@xml:id'] = trim(strval($xmlId));
         }
-
-        //Check for plain text
-        /*$text = trim((string)$node);
-        if(!empty($text) && $nodeValue !== $text) {
-
-            $result['@text'] = $text;
-        }
-        */
         
         // Parse child nodes
 

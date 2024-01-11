@@ -24,11 +24,14 @@ function xmlToArray(SimpleXMLElement $xml): array
 {
     $parseNode = function (SimpleXMLElement $node) use (&$parseNode) {
         $result = [];
-        
+
         // Parse attributes
         $attributes = $node->attributes();
         foreach ($attributes as $attrName => $attrValue) {
-            $result['@attributes'][$attrName] = trim(strval($attrValue));
+            $trimmedValue = trim(strval($attrValue));
+            if (!empty($trimmedValue)) {
+                $result['@attributes'][$attrName] = $trimmedValue;
+            }
         }
 
         // Parse value
@@ -36,28 +39,24 @@ function xmlToArray(SimpleXMLElement $xml): array
         if (!empty($nodeValue)) {
             $result['@value'] = $nodeValue;
         }
-        
 
         // Include xml:id attribute
         $xmlId = $node->attributes('xml', true)->id;
-        if (!empty($xmlId)) {
-            $result['@xml:id'] = trim(strval($xmlId));
+        $trimmedXmlId = trim(strval($xmlId));
+        if (!empty($trimmedXmlId)) {
+            $result['@xml:id'] = $trimmedXmlId;
         }
-        
-        // Parse child nodes
 
-    /*
-    *  Die Child Nodes werden erst dann zu einem Array, wenn das erste Element mit dem selben Namen
-    *  bereits geparst wurde. Daher entstehen die Fehler. Klüger wäre es, zunächst den Namen
-    *  und dann die Kindelemente zu parsen. => TODO
-    */
-        foreach ($node->children() as $childName => $childNode) {
-            if (isset($result[$childName])) {
-                // If multiple nodes with the same name, convert to an array
-                $result[$childName] = array_merge((array)$result[$childName], [$parseNode($childNode)]);
-            } else {
-                $result[$childName] = $parseNode($childNode);
+        // Parse child nodes
+        foreach ($node->children() as $childNode) {
+            $childName = $childNode->getName();
+            $childData = $parseNode($childNode);
+
+            // Always represent child nodes as an array
+            if (!isset($result[$childName])) {
+                $result[$childName] = [];
             }
+            $result[$childName][] = $childData;
         }
 
         return $result;
@@ -65,6 +64,8 @@ function xmlToArray(SimpleXMLElement $xml): array
 
     return [$xml->getName() => $parseNode($xml)];
 }
+
+
 
 
 // Example usage:

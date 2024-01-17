@@ -52,7 +52,7 @@ function xmlToArray(SimpleXMLElement $xml): array
             $childName = $childNode->getName();
             $childData = $parseNode($childNode);
 
-            // Always represent child nodes as an array
+            // Always parse child nodes as array
             if (!isset($result[$childName])) {
                 $result[$childName] = [];
             }

@@ -47,9 +47,27 @@ function xmlToArray(SimpleXMLElement $xml): array
             $result['@xml:id'] = $trimmedXmlId;
         }
 
+        
+        if($node->getName() == "p") {
+            
+            if($node->count() > 0) {
+                
+                $literal = strval($node) . " ";
+                
+                foreach($node->children() as $childnode) {
+
+                    $literal .= strval($childnode) . " ";
+
+            }        
+
+                $result['@literal'] = $literal;
+            }
+        }
+        
+
 
         // Parse child nodes
-        foreach ($node->children() as $childNode) {
+        foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
             $childData = $parseNode($childNode);
 

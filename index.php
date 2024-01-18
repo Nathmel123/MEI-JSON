@@ -47,14 +47,6 @@ function xmlToArray(SimpleXMLElement $xml): array
             $result['@xml:id'] = $trimmedXmlId;
         }
 
-        /*
-        if($node->getName() == "p") {
-
-            //Check for mixed-content => TODO
-            $result["@literal"] = $node->__toString();
-        }
-        */
-
 
         // Parse child nodes
         foreach ($node->children() as $childNode) {

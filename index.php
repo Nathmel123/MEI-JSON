@@ -64,7 +64,6 @@ function xmlToArray(SimpleXMLElement $xml): array
             }
         }
         
-	//Testkomentar für einen Testcommit
 	
         // Parse child nodes
         foreach($node->children() as $childNode) {

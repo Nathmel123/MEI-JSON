@@ -2,6 +2,7 @@
 
 <?php
 
+
 function meiXmlToJson($meiXmlString) {
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
@@ -46,7 +47,22 @@ function xmlToArray(SimpleXMLElement $xml): array
         if (!empty($trimmedXmlId)) {
             $result['@xml:id'] = $trimmedXmlId;
         }
+
+        //Check if node is a mixed-content element
         
+        if($node->getName() == "p") {
+            
+            if($node->count() > 0 && !empty($node)) {
+                
+                //Add literal string, to store the node order
+
+                $literal = str_replace(array("\n","\r"),'',trim($node->asXML()));
+                $result['@literal'] = $literal;
+            }
+            
+        }
+        
+	
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
@@ -64,8 +80,6 @@ function xmlToArray(SimpleXMLElement $xml): array
 
     return [$xml->getName() => $parseNode($xml)];
 }
-
-
 
 
 // Example usage:

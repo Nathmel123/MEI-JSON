@@ -2,6 +2,8 @@
 
 <?php
 
+use Random\Engine\PcgOneseq128XslRr64;
+
 function meiXmlToJson($meiXmlString) {
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
@@ -50,18 +52,12 @@ function xmlToArray(SimpleXMLElement $xml): array
         
         if($node->getName() == "p") {
             
-            if($node->count() > 0) {
+            if($node->count() > 0 && !empty($node)) {
                 
-                $literal = strval($node) . " ";
-                
-                foreach($node->children() as $childnode) {
-
-                    $literal .= strval($childnode) . " ";
-
-            }        
-
+                $literal = str_replace(array("\n","\r"),'',trim($node->asXML()));
                 $result['@literal'] = $literal;
             }
+            
         }
         
 	

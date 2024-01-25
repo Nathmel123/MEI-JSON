@@ -48,11 +48,14 @@ function xmlToArray(SimpleXMLElement $xml): array
             $result['@xml:id'] = $trimmedXmlId;
         }
 
+        //Check if node is a mixed-content element
         
         if($node->getName() == "p") {
             
             if($node->count() > 0 && !empty($node)) {
                 
+                //Add literal string, to store the node order
+
                 $literal = str_replace(array("\n","\r"),'',trim($node->asXML()));
                 $result['@literal'] = $literal;
             }

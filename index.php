@@ -82,8 +82,6 @@ function xmlToArray(SimpleXMLElement $xml): array
 }
 
 
-
-
 // Example usage:
 $meiXmlString = file_get_contents('meitest.xml');
 $jsonResult = meiXmlToJson($meiXmlString);

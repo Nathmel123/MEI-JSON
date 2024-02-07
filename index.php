@@ -2,7 +2,6 @@
 
 <?php
 
-
 function meiXmlToJson($meiXmlString) {
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
@@ -42,24 +41,28 @@ function xmlToArray(SimpleXMLElement $xml): array
         }
 
         // Include xml:id attribute
-        $xmlId = $node->attributes('xml', true)->id;
-        $trimmedXmlId = trim(strval($xmlId));
-        if (!empty($trimmedXmlId)) {
+        global $config;
+        if($config->{'include_xml_id'}) {
+
+            $xmlId = $node->attributes('xml', true)->id;
+            $trimmedXmlId = trim(strval($xmlId));
+            if (!empty($trimmedXmlId)) {
             $result['@xml:id'] = $trimmedXmlId;
+            }
+
         }
 
-        //Check if node is a mixed-content element
-        
-        if($node->getName() == "p") {
-            
-            if($node->count() > 0 && !empty($node)) {
-                
-                //Add literal string, to store the node order
 
-                $literal = str_replace(array("\n","\r"),'',trim($node->asXML()));
-                $result['@literal'] = $literal;
+        // Check if node is a mixed-content element
+        
+        if($config->{"include_literal_string"}) {
+            if($node->getName() == "p") {    
+                if($node->count() > 0 && !empty($node)) {
+                    // Add literal string, to store the node order
+                    $literal = str_replace(array("\n","\r"),'',trim($node->asXML()));
+                    $result['@literal'] = $literal;
+                }
             }
-            
         }
         
 	
@@ -84,6 +87,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 
 // Example usage:
 $meiXmlString = file_get_contents('meitest.xml');
+$config = json_decode(file_get_contents("config.json"));
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $outputfilename = "output.json";

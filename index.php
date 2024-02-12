@@ -11,6 +11,7 @@ function meiXmlToJson($meiXmlString) {
         return json_encode(['error' => 'Invalid XML']);
     }
 
+    // Get xmlid of root element and write it to filename
     global $filename;
     $filename = trim(strval($xml->attributes('xml', true)->id)) . ".json";
 
@@ -87,10 +88,20 @@ function xmlToArray(SimpleXMLElement $xml): array
     return [$xml->getName() => $parseNode($xml)];
 }
 
+// Helper function to split and parse child tree
+function splitTree(SimpleXMLElement $xml) {
+
+    $filename = $xml->getName();
+    $array = xmlToArray($xml);
+    $file = fopen($filename, "w");
+    fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
+    fclose($file);
+
+}
 
 // Example usage:
 $filename;
-$meiXmlString = file_get_contents('meitest.xml');
+$meiXmlString = file_get_contents('meitest2.xml');
 $config = json_decode(file_get_contents("config.json"));
 $jsonResult = meiXmlToJson($meiXmlString);
 

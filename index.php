@@ -11,6 +11,9 @@ function meiXmlToJson($meiXmlString) {
         return json_encode(['error' => 'Invalid XML']);
     }
 
+    global $filename;
+    $filename = trim(strval($xml->attributes('xml', true)->id)) . ".json";
+
     // Convert SimpleXMLElement to associative array
     $array = xmlToArray($xml);
 
@@ -86,13 +89,12 @@ function xmlToArray(SimpleXMLElement $xml): array
 
 
 // Example usage:
+$filename;
 $meiXmlString = file_get_contents('meitest.xml');
 $config = json_decode(file_get_contents("config.json"));
 $jsonResult = meiXmlToJson($meiXmlString);
 
-$outputfilename = "output.json";
-
-$file = fopen($outputfilename, "w");
+$file = fopen($filename, "w");
 if(!$file) {
 	die("Could not open File.");
 }

@@ -3,6 +3,10 @@ x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 <?php
 
 function meiXmlToJson($meiXmlString) {
+    // Intit global vars
+    global $config, $filename;
+    // Load config file and convert to associatve array
+    $config = json_decode(file_get_contents("config.json"),true);
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
 
@@ -12,7 +16,6 @@ function meiXmlToJson($meiXmlString) {
     }
 
     // Get xmlid of root element and write it to filename
-    global $filename;
     $filename = trim(strval($xml->attributes('xml', true)->id)) . ".json";
 
     // Convert SimpleXMLElement to associative array
@@ -27,8 +30,9 @@ function meiXmlToJson($meiXmlString) {
 function xmlToArray(SimpleXMLElement $xml): array
 {
     $parseNode = function (SimpleXMLElement $node) use (&$parseNode) {
-        $result = [];
+        //Init
         global $config;
+        $result = [];
 
         // Parse attributes
         $attributes = $node->attributes();
@@ -45,13 +49,8 @@ function xmlToArray(SimpleXMLElement $xml): array
             $result['@value'] = $nodeValue;
         }
 
-        foreach($config->{'splitSymbols'} as $splitSymbol) {
-            var_dump($splitSymbol);
-
-        }
-
         // Include xml:id attribute
-        if($config->include_xml_id) {
+        if($config['include_xml_id']) {
 
             $xmlId = $node->attributes('xml', true)->id;
             $trimmedXmlId = trim(strval($xmlId));
@@ -64,7 +63,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 
         // Check if node is a mixed-content element
         
-        if($config->{"include_literal_string"}) {
+        if($config['include_literal_string']) {
             if($node->getName() == "p") {    
                 if($node->count() > 0 && !empty($node)) {
                     // Add literal string, to store the node order
@@ -74,7 +73,6 @@ function xmlToArray(SimpleXMLElement $xml): array
             }
         }
         
-	
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
@@ -82,6 +80,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 
             // Always parse child nodes as array
             if (!isset($result[$childName])) {
+
                 $result[$childName] = [];
             }
             $result[$childName][] = $childData;
@@ -108,7 +107,6 @@ function writeChildTree(SimpleXMLElement $xml) {
 // Example usage:
 $filename;
 $meiXmlString = file_get_contents('meitest2.xml');
-$config = json_decode(file_get_contents("config.json"),true);
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");

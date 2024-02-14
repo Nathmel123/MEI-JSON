@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
+x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 
 <?php
 
@@ -28,6 +28,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 {
     $parseNode = function (SimpleXMLElement $node) use (&$parseNode) {
         $result = [];
+        global $config;
 
         // Parse attributes
         $attributes = $node->attributes();
@@ -44,9 +45,13 @@ function xmlToArray(SimpleXMLElement $xml): array
             $result['@value'] = $nodeValue;
         }
 
+        foreach($config->{'splitSymbols'} as $splitSymbol) {
+            var_dump($splitSymbol);
+
+        }
+
         // Include xml:id attribute
-        global $config;
-        if($config->{'include_xml_id'}) {
+        if($config->include_xml_id) {
 
             $xmlId = $node->attributes('xml', true)->id;
             $trimmedXmlId = trim(strval($xmlId));
@@ -89,7 +94,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 }
 
 // Helper function to split and parse child tree
-function splitTree(SimpleXMLElement $xml) {
+function writeChildTree(SimpleXMLElement $xml) {
 
     $filename = $xml->getName();
     $array = xmlToArray($xml);
@@ -99,10 +104,11 @@ function splitTree(SimpleXMLElement $xml) {
 
 }
 
+
 // Example usage:
 $filename;
 $meiXmlString = file_get_contents('meitest2.xml');
-$config = json_decode(file_get_contents("config.json"));
+$config = json_decode(file_get_contents("config.json"),true);
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");

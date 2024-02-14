@@ -1,7 +1,11 @@
 {
 
 	"include_xml_id":false,
-	"include_literal_string":true
+	"include_literal_string":true,
+	"splitSymbols":[
+		"<changeDesc>",
+		"</changeDesc>"	
+	]
 }
 
 

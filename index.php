@@ -103,6 +103,26 @@ function writeChildTree(SimpleXMLElement $xml) {
 
 }
 
+function readSplitSymbols($config) : array{
+
+    $result = array();
+    $splitSymbols = $config['splitSymbols'];
+    
+    foreach($splitSymbols as $sym) {
+
+
+        if(str_contains($sym, "<") || str_contains($sym, ">")) {
+
+            $sym = str_replace("<", "&lt", $sym);
+            $sym = str_replace(">", "&gt", $sym);
+        }
+
+        array_push($sym, $result);
+    }
+
+    return $result;
+}   
+
 
 // Example usage:
 $filename;

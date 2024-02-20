@@ -2,9 +2,8 @@ x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 
 <?php
 
-function meiXmlToJson($meiXmlString) {
-    // Intit global vars
-    global $config, $filename;
+function meiXmlToJson($meiXmlString, array $config) {
+
     // Load config file and convert to associatve array
     $config = json_decode(file_get_contents("config.json"),true);
     // Load MEI-XML string into SimpleXMLElement
@@ -14,12 +13,12 @@ function meiXmlToJson($meiXmlString) {
         // Handle XML parsing error
         return json_encode(['error' => 'Invalid XML']);
     }
-
+    global $filename; //To be removed, move file interactions to MeiXmlToJson
     // Get xmlid of root element and write it to filename
     $filename = trim(strval($xml->attributes('xml', true)->id)) . ".json";
 
     // Convert SimpleXMLElement to associative array
-    $array = xmlToArray($xml);
+    $array = xmlToArray($xml, $config);
 
     // Convert array to JSON
     $json = json_encode($array, JSON_PRETTY_PRINT);
@@ -27,11 +26,9 @@ function meiXmlToJson($meiXmlString) {
     return $json;
 }
 
-function xmlToArray(SimpleXMLElement $xml): array
+function xmlToArray(SimpleXMLElement $xml, array $config): array
 {
-    $parseNode = function (SimpleXMLElement $node) use (&$parseNode) {
-        //Init
-        global $config;
+    $parseNode = function (SimpleXMLElement $node, array $config) use (&$parseNode) {
         $result = [];
 
         // Parse attributes
@@ -76,7 +73,7 @@ function xmlToArray(SimpleXMLElement $xml): array
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
-            $childData = $parseNode($childNode);
+            $childData = $parseNode($childNode, $config);
 
             // Always parse child nodes as array
             if (!isset($result[$childName])) {
@@ -89,14 +86,14 @@ function xmlToArray(SimpleXMLElement $xml): array
         return $result;
     };
 
-    return [$xml->getName() => $parseNode($xml)];
+    return [$xml->getName() => $parseNode($xml, $config)];
 }
 
 // Helper function to split and parse child tree
-function writeChildTree(SimpleXMLElement $xml) {
+function writeChildTree(SimpleXMLElement $xml, array $config) {
 
     $filename = $xml->getName();
-    $array = xmlToArray($xml);
+    $array = xmlToArray($xml, $config);
     $file = fopen($filename, "w");
     fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
     fclose($file);
@@ -127,7 +124,7 @@ function readSplitSymbols($config) : array{
 // Example usage:
 $filename;
 $meiXmlString = file_get_contents('meitest2.xml');
-$jsonResult = meiXmlToJson($meiXmlString);
+$jsonResult = meiXmlToJson($meiXmlString, $config);
 
 $file = fopen($filename, "w");
 if(!$file) {

@@ -5,7 +5,7 @@ x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 function meiXmlToJson($meiXmlString) {
     // Intit global vars
     global $config, $filename;
-    // Load config file and convert it to associatve array
+    // Load config file and convert to associatve array
     $config = json_decode(file_get_contents("config.json"),true);
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
@@ -62,6 +62,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 
 
         // Check if node is a mixed-content element
+        
         if($config['include_literal_string']) {
             if($node->getName() == "p") {    
                 if($node->count() > 0 && !empty($node)) {
@@ -99,28 +100,6 @@ function writeChildTree(SimpleXMLElement $xml) {
     $file = fopen($filename, "w");
     fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
     fclose($file);
-
-}
-
-//Load splitSymbols to Array
-function loadSplitSymbols() : array{
-    global $config;
-    $result = array();
-    $splitSymbols = $config['splitSymbols'];
-    foreach($splitSymbols as $sym) {
-        /*
-        Ist dieses if statement sinnvoll? 
-        Ist die Auswirkung auf die Laufzeit positiv oder negativ?
-        */
-        if(str_contains($sym, "<") || str_contains($sym, ">")) {
-            $sym = str_replace("<", "&lt", $sym);
-            $sym = str_replace(">", "&gt", $sym);
-        }
-
-        array_push($result, $sym);
-    }
-
-    return $result;
 
 }
 

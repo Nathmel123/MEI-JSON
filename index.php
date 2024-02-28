@@ -2,7 +2,7 @@ x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 
 <?php
 
-function meiXmlToJson($meiXmlString, array $config) {
+function meiXmlToJson($meiXmlString) {
 
     // Load config file and convert to associatve array
     $config = json_decode(file_get_contents("config.json"),true);
@@ -124,7 +124,7 @@ function readSplitSymbols($config) : array{
 // Example usage:
 $filename;
 $meiXmlString = file_get_contents('meitest2.xml');
-$jsonResult = meiXmlToJson($meiXmlString, $config);
+$jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");
 if(!$file) {

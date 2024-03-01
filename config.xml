@@ -1,0 +1,8 @@
+<!DOCTYPE config SYSTEM "config.dtd">
+<config>
+   <splitSymbols>
+    <symbol>changeDesc</symbol>
+   </splitSymbols>
+   <literalString include="false" />
+   <xmlId include="false" />
+</config>

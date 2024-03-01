@@ -1,0 +1,7 @@
+<!ELEMENT config (splitSymbols*, literalString*, xmlId*)>
+<!ELEMENT splitSymbols (symbol*)>
+<!ELEMENT symbol (#PCDATA)>
+<!ELEMENT literalString EMPTY>
+<!ATTLIST literalString include (true | false) #REQUIRED>
+<!ELEMENT xmlId EMPTY>
+<!ATTLIST xmlId include (true | false) #REQUIRED>

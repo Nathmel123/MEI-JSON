@@ -4,13 +4,13 @@
 
 function meiXmlToJson($meiXmlString) {
 
-    // Load config file and convert to associatve array
+    //Check if config file is valid
     $xmlDom = new DOMDocument();
     $xmlDom->load("config.xml");
-
     if(!$xmlDom->validate()) {
         die("Aborted - please provie a valid config file");
     }
+    // Load config file
     $config = simplexml_load_file("config.xml");
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);

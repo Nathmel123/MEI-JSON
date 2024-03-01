@@ -1,11 +1,17 @@
-x<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
+<!DOCTYPE html><html><head><meta charset="utf-8"></meta></head><body>
 
 <?php
 
 function meiXmlToJson($meiXmlString) {
 
     // Load config file and convert to associatve array
-    $config = json_decode(file_get_contents("config.json"),true);
+    $xmlDom = new DOMDocument();
+    $xmlDom->load("config.xml");
+
+    if(!$xmlDom->validate()) {
+        die("Aborted - please provie a valid config file");
+    }
+    $config = simplexml_load_file("config.xml");
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
 
@@ -26,11 +32,10 @@ function meiXmlToJson($meiXmlString) {
     return $json;
 }
 
-function xmlToArray(SimpleXMLElement $xml, array $config): array
+function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
 {
-    $parseNode = function (SimpleXMLElement $node, array $config) use (&$parseNode) {
+    $parseNode = function (SimpleXMLElement $node, SimpleXMLElement $config) use (&$parseNode) {
         $result = [];
-
         // Parse attributes
         $attributes = $node->attributes();
         foreach ($attributes as $attrName => $attrValue) {
@@ -47,7 +52,7 @@ function xmlToArray(SimpleXMLElement $xml, array $config): array
         }
 
         // Include xml:id attribute
-        if($config['include_xml_id']) {
+        if($config->xmlId['include'] == 'true') {
 
             $xmlId = $node->attributes('xml', true)->id;
             $trimmedXmlId = trim(strval($xmlId));
@@ -60,7 +65,7 @@ function xmlToArray(SimpleXMLElement $xml, array $config): array
 
         // Check if node is a mixed-content element
         
-        if($config['include_literal_string']) {
+        if($config->literalString['include'] == 'true') {
             if($node->getName() == "p") {    
                 if($node->count() > 0 && !empty($node)) {
                     // Add literal string, to store the node order
@@ -90,7 +95,7 @@ function xmlToArray(SimpleXMLElement $xml, array $config): array
 }
 
 // Helper function to split and parse child tree
-function writeChildTree(SimpleXMLElement $xml, array $config) {
+function writeChildTree(SimpleXMLElement $xml, SimpleXMLElement $config) {
 
     $filename = $xml->getName();
     $array = xmlToArray($xml, $config);
@@ -103,23 +108,19 @@ function writeChildTree(SimpleXMLElement $xml, array $config) {
 function readSplitSymbols($config) : array{
 
     $result = array();
-    $splitSymbols = $config['splitSymbols'];
+    $splitSymbols = $config->splitSymbols->children();
     
     foreach($splitSymbols as $sym) {
 
-
-        if(str_contains($sym, "<") || str_contains($sym, ">")) {
-
-            $sym = str_replace("<", "&lt", $sym);
-            $sym = str_replace(">", "&gt", $sym);
+        if(!empty($sym)) {
+            array_push($result, $sym);
         }
-
-        array_push($sym, $result);
+        
     }
 
     return $result;
+    
 }   
-
 
 // Example usage:
 $filename;

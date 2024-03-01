@@ -1,4 +1,4 @@
-<!ELEMENT config (splitSymbols*, literalString*, xmlId*)>
+<!ELEMENT config (literalString, xmlId, splitSymbols)>
 <!ELEMENT splitSymbols (symbol*)>
 <!ELEMENT symbol (#PCDATA)>
 <!ELEMENT literalString EMPTY>

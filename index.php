@@ -78,6 +78,14 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
+            $xmlString = $childNode->asXML();
+            foreach(readSplitSymbols($config) as $symbol) {
+                if(str_contains($xmlString, $symbol)){
+                    writeChildTree($childNode, $config);
+                    $result["@link"][$node->attributes('xml', true)->id];
+                    return $result;
+                }
+            }
             $childData = $parseNode($childNode, $config);
 
             // Always parse child nodes as array

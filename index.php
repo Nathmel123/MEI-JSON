@@ -78,9 +78,10 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
-            $xmlString = $childNode->asXML();
+            $xmlString =  $childNode->asXML();
             foreach(readSplitSymbols($config) as $symbol) {
-                if(str_contains($xmlString, $symbol)){
+                $symbol = "/".$symbol."$/";
+                if(preg_match($symbol,$xmlString)){
                     writeChildTree($childNode, $config);
                     $result["@link"][$node->attributes('xml', true)->id];
                     return $result;
@@ -105,12 +106,12 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
 // Helper function to split and parse child tree
 function writeChildTree(SimpleXMLElement $xml, SimpleXMLElement $config) {
 
-    $filename = $xml->getName();
+    $filename = $xml->atrributes('xml',true)->id . ".json";
     $array = xmlToArray($xml, $config);
     $file = fopen($filename, "w");
     fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
     fclose($file);
-
+    
 }
 
 function readSplitSymbols($config) : array{

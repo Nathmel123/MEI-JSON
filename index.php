@@ -133,7 +133,7 @@ function readSplitSymbols($config) : array{
 
 // Example usage:
 $filename;
-$meiXmlString = file_get_contents('meitest2.xml');
+$meiXmlString = file_get_contents('meitest.xml');
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");

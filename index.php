@@ -79,13 +79,16 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
             $xmlString =  $childNode->asXML();
+            $found = false;
             foreach(readSplitSymbols($config) as $symbol) {
-                $symbol = "/".$symbol."$/";
-                if(preg_match($symbol,$xmlString)){
+                if(str_contains($childName,$symbol)){
                     writeChildTree($childNode, $config);
-                    $result["@link"][$node->attributes('xml', true)->id];
-                    return $result;
+                    $result["@link"] = strval($node->attributes('xml', true)->id);
+                    $found = true;
                 }
+            }
+            if($found) {
+                return $result;
             }
             $childData = $parseNode($childNode, $config);
 
@@ -106,7 +109,7 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
 // Helper function to split and parse child tree
 function writeChildTree(SimpleXMLElement $xml, SimpleXMLElement $config) {
 
-    $filename = $xml->atrributes('xml',true)->id . ".json";
+    $filename = $xml->attributes('xml',true)->id . ".json";
     $array = xmlToArray($xml, $config);
     $file = fopen($filename, "w");
     fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
@@ -114,7 +117,8 @@ function writeChildTree(SimpleXMLElement $xml, SimpleXMLElement $config) {
     
 }
 
-function readSplitSymbols($config) : array{
+// Function to read split symbols from config file and write them to an array
+function readSplitSymbols(SimpleXMLElement $config) : array{
 
     $result = array();
     $splitSymbols = $config->splitSymbols->children();
@@ -122,7 +126,7 @@ function readSplitSymbols($config) : array{
     foreach($splitSymbols as $sym) {
 
         if(!empty($sym)) {
-            array_push($result, $sym);
+            array_push($result, strval($sym));
         }
         
     }
@@ -133,7 +137,7 @@ function readSplitSymbols($config) : array{
 
 // Example usage:
 $filename;
-$meiXmlString = file_get_contents('meitest.xml');
+$meiXmlString = file_get_contents('meitest2.xml');
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");

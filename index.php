@@ -3,6 +3,15 @@
 <?php
 
 function meiXmlToJson($meiXmlString) {
+
+    //Check if config file is valid
+    $xmlDom = new DOMDocument();
+    $xmlDom->load("config.xml");
+    if(!$xmlDom->validate()) {
+        die("Aborted - please provie a valid config file");
+    }
+    // Load config file
+    $config = simplexml_load_file("config.xml");
     // Load MEI-XML string into SimpleXMLElement
     $xml = simplexml_load_string($meiXmlString);
 
@@ -10,12 +19,12 @@ function meiXmlToJson($meiXmlString) {
         // Handle XML parsing error
         return json_encode(['error' => 'Invalid XML']);
     }
-
-    global $filename;
+    global $filename; //To be removed, move file interactions to MeiXmlToJson
+    // Get xmlid of root element and write it to filename
     $filename = trim(strval($xml->attributes('xml', true)->id)) . ".json";
 
     // Convert SimpleXMLElement to associative array
-    $array = xmlToArray($xml);
+    $array = xmlToArray($xml, $config);
 
     // Convert array to JSON
     $json = json_encode($array, JSON_PRETTY_PRINT);
@@ -23,11 +32,10 @@ function meiXmlToJson($meiXmlString) {
     return $json;
 }
 
-function xmlToArray(SimpleXMLElement $xml): array
+function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
 {
-    $parseNode = function (SimpleXMLElement $node) use (&$parseNode) {
+    $parseNode = function (SimpleXMLElement $node, SimpleXMLElement $config) use (&$parseNode) {
         $result = [];
-
         // Parse attributes
         $attributes = $node->attributes();
         foreach ($attributes as $attrName => $attrValue) {
@@ -44,8 +52,7 @@ function xmlToArray(SimpleXMLElement $xml): array
         }
 
         // Include xml:id attribute
-        global $config;
-        if($config->{'include_xml_id'}) {
+        if($config->xmlId['include'] == 'true') {
 
             $xmlId = $node->attributes('xml', true)->id;
             $trimmedXmlId = trim(strval($xmlId));
@@ -58,7 +65,7 @@ function xmlToArray(SimpleXMLElement $xml): array
 
         // Check if node is a mixed-content element
         
-        if($config->{"include_literal_string"}) {
+        if($config->literalString['include'] == 'true') {
             if($node->getName() == "p") {    
                 if($node->count() > 0 && !empty($node)) {
                     // Add literal string, to store the node order
@@ -68,14 +75,26 @@ function xmlToArray(SimpleXMLElement $xml): array
             }
         }
         
-	
         // Parse child nodes
         foreach($node->children() as $childNode) {
             $childName = $childNode->getName();
-            $childData = $parseNode($childNode);
+            $xmlString =  $childNode->asXML();
+            $found = false;
+            foreach(readSplitSymbols($config) as $symbol) {
+                if(str_contains($childName,$symbol)){
+                    writeChildTree($childNode, $config);
+                    $result["@link"] = strval($node->attributes('xml', true)->id);
+                    $found = true;
+                }
+            }
+            if($found) {
+                return $result;
+            }
+            $childData = $parseNode($childNode, $config);
 
             // Always parse child nodes as array
             if (!isset($result[$childName])) {
+
                 $result[$childName] = [];
             }
             $result[$childName][] = $childData;
@@ -84,14 +103,41 @@ function xmlToArray(SimpleXMLElement $xml): array
         return $result;
     };
 
-    return [$xml->getName() => $parseNode($xml)];
+    return [$xml->getName() => $parseNode($xml, $config)];
 }
 
+// Helper function to split and parse child tree
+function writeChildTree(SimpleXMLElement $xml, SimpleXMLElement $config) {
+
+    $filename = $xml->attributes('xml',true)->id . ".json";
+    $array = xmlToArray($xml, $config);
+    $file = fopen($filename, "w");
+    fwrite($file, json_encode($array, JSON_PRETTY_PRINT));
+    fclose($file);
+    
+}
+
+// Function to read split symbols from config file and write them to an array
+function readSplitSymbols(SimpleXMLElement $config) : array{
+
+    $result = array();
+    $splitSymbols = $config->splitSymbols->children();
+    
+    foreach($splitSymbols as $sym) {
+
+        if(!empty($sym)) {
+            array_push($result, strval($sym));
+        }
+        
+    }
+
+    return $result;
+    
+}   
 
 // Example usage:
 $filename;
-$meiXmlString = file_get_contents('meitest.xml');
-$config = json_decode(file_get_contents("config.json"));
+$meiXmlString = file_get_contents('meitest2.xml');
 $jsonResult = meiXmlToJson($meiXmlString);
 
 $file = fopen($filename, "w");

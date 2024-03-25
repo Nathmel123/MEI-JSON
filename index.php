@@ -3,7 +3,7 @@
 <?php
 
 function meiXmlToJson($meiXmlString) {
-
+    $meiXmlString = str_replace("&", "&amp;", $meiXmlString);
     //Check if config file is valid
     $xmlDom = new DOMDocument();
     $xmlDom->load("config.xml");

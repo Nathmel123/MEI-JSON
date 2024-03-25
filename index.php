@@ -83,7 +83,7 @@ function xmlToArray(SimpleXMLElement $xml, SimpleXMLElement $config): array
             foreach(readSplitSymbols($config) as $symbol) {
                 if(str_contains($childName,$symbol)){
                     writeChildTree($childNode, $config);
-                    $result["@link"] = strval($node->attributes('xml', true)->id);
+                    $result["@link"] = strval($childNode->attributes('xml', true)->id);
                     $found = true;
                 }
             }
